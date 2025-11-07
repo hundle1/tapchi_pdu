@@ -1,143 +1,150 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Plus, Edit, Trash, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
-import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from '@/components/ui/table';
-import { toast } from 'sonner';
-import { Badge } from '@/components/ui/badge';
-import router from 'next/router';
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { Plus, Edit, Trash, X, Slash } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
+import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from '@/components/ui/table'
+import { toast } from 'sonner'
+import { Badge } from '@/components/ui/badge'
 
 interface CategoryOrMajor {
-    id: string;
-    name: string;
+    id: string
+    name: string
 }
 
 export default function OptionsPage() {
-    const [categories, setCategories] = useState<CategoryOrMajor[]>([]);
-    const [majors, setMajors] = useState<CategoryOrMajor[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [categories, setCategories] = useState<CategoryOrMajor[]>([])
+    const [majors, setMajors] = useState<CategoryOrMajor[]>([])
+    const [loading, setLoading] = useState(true)
 
     // Modal states
-    const [showModal, setShowModal] = useState(false);
-    const [modalType, setModalType] = useState<'category' | 'major'>('category');
-    const [modalName, setModalName] = useState('');
+    const [showModal, setShowModal] = useState(false)
+    const [modalType, setModalType] = useState<'category' | 'major'>('category')
+    const [modalName, setModalName] = useState('')
 
     useEffect(() => {
-        fetchOptions();
-    }, []);
+        fetchOptions()
+    }, [])
 
     const fetchOptions = async () => {
-        setLoading(true);
+        setLoading(true)
         try {
-            const res = await fetch('/api/admin/options');
+            const res = await fetch('/api/admin/options')
             if (res.ok) {
-                const data = await res.json();
-                setCategories(data.categories || []);
-                setMajors(data.majors || []);
+                const data = await res.json()
+                setCategories(data.categories || [])
+                setMajors(data.majors || [])
             } else {
-                toast.error('Không thể tải dữ liệu');
+                toast.error('Không thể tải dữ liệu')
             }
         } catch (error) {
-            console.error(error);
-            toast.error('Lỗi server khi tải dữ liệu');
+            console.error(error)
+            toast.error('Lỗi server khi tải dữ liệu')
         } finally {
-            setLoading(false);
+            setLoading(false)
         }
-    };
+    }
 
     const handleDelete = async (type: 'category' | 'major', id: string) => {
-        if (!confirm('Bạn có chắc chắn muốn xóa?')) return;
+        if (!confirm('Bạn có chắc chắn muốn xóa?')) return
         try {
-            const res = await fetch(`/api/admin/options/${type}/${id}`, { method: 'DELETE' });
+            const res = await fetch(`/api/admin/options/${type}/${id}`, { method: 'DELETE' })
             if (res.ok) {
-                toast.success('Xóa thành công');
-                fetchOptions();
+                toast.success('Xóa thành công')
+                fetchOptions()
             } else {
-                toast.error('Không thể xóa');
+                toast.error('Không thể xóa')
             }
         } catch (error) {
-            console.error(error);
-            toast.error('Lỗi khi xóa');
+            console.error(error)
+            toast.error('Lỗi khi xóa')
         }
-    };
+    }
 
     const handleEdit = (type: 'category' | 'major', id: string) => {
-        const newName = prompt('Nhập tên mới');
-        if (!newName) return;
+        const newName = prompt('Nhập tên mới')
+        if (!newName) return
         fetch(`/api/admin/options/${type}/${id}`, {
             method: 'PUT',
             body: JSON.stringify({ name: newName }),
             headers: { 'Content-Type': 'application/json' },
-        }).then(res => {
-            if (res.ok) {
-                toast.success('Cập nhật thành công');
-                fetchOptions();
-            } else toast.error('Không thể cập nhật');
-        }).catch(() => toast.error('Lỗi server'));
-    };
+        })
+            .then((res) => {
+                if (res.ok) {
+                    toast.success('Cập nhật thành công')
+                    fetchOptions()
+                } else toast.error('Không thể cập nhật')
+            })
+            .catch(() => toast.error('Lỗi server'))
+    }
 
     const openModal = (type: 'category' | 'major') => {
-        setModalType(type);
-        setModalName('');
-        setShowModal(true);
-    };
+        setModalType(type)
+        setModalName('')
+        setShowModal(true)
+    }
 
     const handleModalSubmit = async () => {
         if (!modalName.trim()) {
-            toast.error('Tên không được để trống');
-            return;
+            toast.error('Tên không được để trống')
+            return
         }
         try {
             const res = await fetch(`/api/admin/options/${modalType}`, {
                 method: 'POST',
                 body: JSON.stringify({ name: modalName }),
                 headers: { 'Content-Type': 'application/json' },
-            });
+            })
             if (res.ok) {
-                toast.success(`Thêm ${modalType === 'category' ? 'danh mục' : 'khoa/ngành'} thành công`);
-                setShowModal(false);
-                fetchOptions();
+                toast.success(
+                    `Thêm ${modalType === 'category' ? 'danh mục' : 'khoa/ngành'} thành công`
+                )
+                setShowModal(false)
+                fetchOptions()
             } else {
-                toast.error('Không thể thêm mới');
+                toast.error('Không thể thêm mới')
             }
         } catch (error) {
-            console.error(error);
-            toast.error('Lỗi server');
+            console.error(error)
+            toast.error('Lỗi server')
         }
-    };
+    }
 
     return (
-        <>
-            <header className="bg-white shadow-sm border-b">
-                <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-20">
-                    <div className="flex justify-between items-center h-20">
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-900">
-                                Tạp Chí Phương Đông Management
-                            </h1>
-                            <div className="mt-1 flex flex-wrap gap-2">
-                                <Badge className='cursor-not-allowed hover:bg-black'>
-                                    <Link href={'#'} className='cursor-not-allowed hover:bg-black'>Quay lại trang chủ</Link>
-                                </Badge>
-                                <Badge className='text-neutral-700 cursor-pointer bg-gray-200 hover:bg-white hover:text-black hover:border-gray-400'>
-                                    <Link href={'/admin'}>
-                                        &lt;- Quay lại trang admin
-                                    </Link>
-                                </Badge>
-                            </div>
-                        </div>
+        <div className="flex min-h-screen bg-gray-100">
+            {/* Nội dung chính */}
+            <main className="flex-1 p-6">
+                <header className="mb-6 flex items-center justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">
+                            Quản lý Danh mục & Khoa/Ngành
+                        </h1>
+                        <p className="text-gray-500 text-sm mt-1">
+                            Quản lý danh mục tạp chí và các khoa/ngành trực thuộc
+                        </p>
                     </div>
-                </div>
-            </header>
+                    <div className="flex gap-1  items-end">
+                        <Slash className='scale-75' />
+                        <Badge
+                            className="mt-2 cursor-pointer"
+                        >
+                            <Link href="/admin/home">← Quay lại trang chủ</Link>
+                        </Badge>
+                        <Slash className='scale-75' />
+                        <Badge
+                            className="mt-2 cursor-pointer"
+                        >
+                            <Link href="/">← Về trang đọc</Link>
+                        </Badge>
 
-            <div className="min-h-screen bg-gray-100 p-8">
-                <h1 className="text-2xl font-bold mb-6">Quản lý Danh mục & Khoa/Ngành</h1>
-                <div className="grid grid-cols-2 gap-6">
+                    </div>
+                </header>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Categories */}
-                    <Card>
+                    <Card className="shadow-md">
                         <CardHeader className="flex flex-row justify-between items-center">
                             <CardTitle>Danh mục</CardTitle>
                             <Button size="sm" onClick={() => openModal('category')}>
@@ -153,15 +160,26 @@ export default function OptionsPage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {categories.map(cat => (
-                                        <TableRow key={cat.id}>
+                                    {categories.map((cat) => (
+                                        <TableRow
+                                            key={cat.id}
+                                            className="hover:bg-gray-50 transition-colors"
+                                        >
                                             <TableCell>{cat.name}</TableCell>
                                             <TableCell>
                                                 <div className="flex items-center space-x-2">
-                                                    <Button variant="outline" size="sm" onClick={() => handleEdit('category', cat.id)}>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleEdit('category', cat.id)}
+                                                    >
                                                         <Edit className="h-4 w-4" />
                                                     </Button>
-                                                    <Button variant="outline" size="sm" onClick={() => handleDelete('category', cat.id)}>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleDelete('category', cat.id)}
+                                                    >
                                                         <Trash className="h-4 w-4" />
                                                     </Button>
                                                 </div>
@@ -170,12 +188,16 @@ export default function OptionsPage() {
                                     ))}
                                 </TableBody>
                             </Table>
-                            {categories.length === 0 && <p className="text-center py-4 text-gray-500">Chưa có danh mục nào</p>}
+                            {categories.length === 0 && (
+                                <p className="text-center py-4 text-gray-500">
+                                    Chưa có danh mục nào
+                                </p>
+                            )}
                         </CardContent>
                     </Card>
 
                     {/* Majors */}
-                    <Card>
+                    <Card className="shadow-md">
                         <CardHeader className="flex flex-row justify-between items-center">
                             <CardTitle>Khoa/Ngành</CardTitle>
                             <Button size="sm" onClick={() => openModal('major')}>
@@ -191,15 +213,26 @@ export default function OptionsPage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {majors.map(maj => (
-                                        <TableRow key={maj.id}>
+                                    {majors.map((maj) => (
+                                        <TableRow
+                                            key={maj.id}
+                                            className="hover:bg-gray-50 transition-colors"
+                                        >
                                             <TableCell>{maj.name}</TableCell>
                                             <TableCell>
                                                 <div className="flex items-center space-x-2">
-                                                    <Button variant="outline" size="sm" onClick={() => handleEdit('major', maj.id)}>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleEdit('major', maj.id)}
+                                                    >
                                                         <Edit className="h-4 w-4" />
                                                     </Button>
-                                                    <Button variant="outline" size="sm" onClick={() => handleDelete('major', maj.id)}>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleDelete('major', maj.id)}
+                                                    >
                                                         <Trash className="h-4 w-4" />
                                                     </Button>
                                                 </div>
@@ -208,11 +241,15 @@ export default function OptionsPage() {
                                     ))}
                                 </TableBody>
                             </Table>
-                            {majors.length === 0 && <p className="text-center py-4 text-gray-500">Chưa có khoa/ngành nào</p>}
+                            {majors.length === 0 && (
+                                <p className="text-center py-4 text-gray-500">
+                                    Chưa có khoa/ngành nào
+                                </p>
+                            )}
                         </CardContent>
                     </Card>
                 </div>
-            </div>
+            </main>
 
             {/* Modal */}
             {showModal && (
@@ -229,18 +266,26 @@ export default function OptionsPage() {
                         </h2>
                         <input
                             type="text"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
-                            placeholder={`Nhập tên ${modalType === 'category' ? 'danh mục' : 'khoa/ngành'} mới`}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 mb-4"
+                            placeholder={`Nhập tên ${modalType === 'category' ? 'danh mục' : 'khoa/ngành'
+                                } mới`}
                             value={modalName}
                             onChange={(e) => setModalName(e.target.value)}
                         />
                         <div className="flex justify-end gap-2">
-                            <Button variant="outline" onClick={() => setShowModal(false)}>Hủy</Button>
-                            <Button onClick={handleModalSubmit}>Thêm</Button>
+                            <Button
+                                variant="outline"
+                                onClick={() => setShowModal(false)}
+                            >
+                                Hủy
+                            </Button>
+                            <Button onClick={handleModalSubmit} className="bg-orange-600 hover:bg-orange-700">
+                                Thêm
+                            </Button>
                         </div>
                     </div>
                 </div>
             )}
-        </>
-    );
+        </div>
+    )
 }

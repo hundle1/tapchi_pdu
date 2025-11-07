@@ -6,11 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 interface CoverImagePickerProps {
-    value: string; // link ảnh (URL hoặc local object URL)
-    onChange: (value: string) => void;
+    localValue: string;
+    urlValue: string;
+    onLocalChange: (value: string) => void;
+    onUrlChange: (value: string) => void;
 }
 
-export default function CoverImagePicker({ value, onChange }: CoverImagePickerProps) {
+
+export default function CoverImagePicker({ localValue, urlValue, onLocalChange, onUrlChange }: CoverImagePickerProps) {
     const [tab, setTab] = useState<"local" | "url">("local");
 
     return (
@@ -51,7 +54,7 @@ export default function CoverImagePicker({ value, onChange }: CoverImagePickerPr
                             const file = e.target.files?.[0];
                             if (file) {
                                 const url = URL.createObjectURL(file);
-                                onChange(url);
+                                onLocalChange(url);
                             }
                         }}
                         className="w-full h-10"
@@ -62,8 +65,8 @@ export default function CoverImagePicker({ value, onChange }: CoverImagePickerPr
                     <Label htmlFor="anhBiaUrl">Nhập link ảnh bìa</Label>
                     <Input
                         id="anhBiaUrl"
-                        value={value}
-                        onChange={(e) => onChange(e.target.value)}
+                        value={urlValue}
+                        onChange={(e) => onUrlChange(e.target.value)}
                         placeholder="https://example.com/cover.jpg"
                         className="w-full h-10"
                     />
@@ -73,10 +76,10 @@ export default function CoverImagePicker({ value, onChange }: CoverImagePickerPr
             {/* Preview ảnh */}
             <div className="flex items-center justify-center gap-4">
                 <div className="relative w-[600px] h-[560px] border rounded-md overflow-hidden shadow bg-gray-50 flex items-center justify-center">
-                    {value ? (
+                    {(tab === "local" ? localValue : urlValue) ? (
                         <>
                             <Image
-                                src={value}
+                                src={tab === "local" ? localValue : urlValue}
                                 alt="Ảnh bìa preview"
                                 fill
                                 className="object-contain"
@@ -84,7 +87,13 @@ export default function CoverImagePicker({ value, onChange }: CoverImagePickerPr
                             />
                             <button
                                 type="button"
-                                onClick={() => onChange("")}
+                                onClick={() => {
+                                    if (tab === "local") {
+                                        onLocalChange("");
+                                    } else {
+                                        onUrlChange("");
+                                    }
+                                }}
                                 className="absolute top-1 right-1 w-6 h-6 flex items-center justify-center rounded-full bg-black text-white border border-white shadow hover:bg-red-600"
                             >
                                 ✕

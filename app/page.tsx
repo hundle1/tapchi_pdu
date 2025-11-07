@@ -75,11 +75,10 @@ export default async function HomePage() {
                     key={magazine.id}
                     magazine={{
                       id: magazine.id,
-                      title: magazine.tieuDe,
-                      description: magazine.moTa,
-                      coverImage: magazine.anhBia ?? '',
-                      publishDate: magazine.createdAt,
-                      status: magazine.trangThai,
+                      tieuDe: magazine.tieuDe,
+                      moTa: magazine.moTa,
+                      anhBia: magazine.anhBiaUrl ?? magazine.anhBiaLocal ?? '',
+                      trangThai: magazine.trangThai,
                     }}
                   />
                 ))}

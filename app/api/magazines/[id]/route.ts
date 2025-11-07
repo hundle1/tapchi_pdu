@@ -11,11 +11,7 @@ export async function GET(
         id: params.id,
       },
       include: {
-        Page: {
-          orderBy: {
-            soTrang: 'asc'
-          }
-        },
+
         TaiKhoanNguoiDung: {
           select: {
             name: true,

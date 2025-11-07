@@ -28,29 +28,20 @@ model Magazine {
   tieuDe              String
   tenTacGia           String?
   moTa                String?
-  anhBiaLocal         String? // link local storage
-  anhBiaUrl           String? // link Url online
+  anhBiaLocal         String?
+  anhBiaUrl           String?
   fileUpload          File?              @relation(fields: [fileUploadId], references: [id])
   fileUploadId        String?
-  soTrang             Int?
   trangThai           String             @default("draft")
   ngayXuatBan         DateTime?
   TaiKhoanNguoiDung   TaiKhoanNguoiDung? @relation(fields: [taiKhoanNguoiDungId], references: [id])
   taiKhoanNguoiDungId String?
-  categoryName        Category[] // 👈 nhiều category
-  major               Major[]
+  categoryName        Category[]         @relation("MagazineCategories") // 👈 đặt tên
+  major               Major[]            @relation("MagazineMajors") // 👈 đặt tên
   readCount           Int                @default(0)
   likeCount           Int                @default(0)
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
-}
-
-model Major {
-  id        String     @id @default(cuid())
-  name      String     @unique
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  magazines Magazine[] // 👈 nhiều magazine
 }
 
 model Category {
@@ -58,7 +49,15 @@ model Category {
   name      String     @unique
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
-  magazines Magazine[] // 👈 nhiều magazine
+  magazines Magazine[] @relation("MagazineCategories") // 👈 khớp tên
+}
+
+model Major {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  magazines Magazine[] @relation("MagazineMajors") // 👈 khớp tên
 }
 
 model File {

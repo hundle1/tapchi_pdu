@@ -17,15 +17,6 @@ export async function GET() {
             email: true
           }
         },
-        Page: {
-          select: {
-            id: true,
-            soTrang: true,
-            imageUrl: true,
-            noiDung: true,
-            createdAt: true
-          }
-        }
       }
     });
 

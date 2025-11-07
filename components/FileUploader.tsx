@@ -1,8 +1,11 @@
+// \components\FileUploader.tsx
 "use client";
 
 import { useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 import type { Accept } from "react-dropzone";
 
 interface FileUploaderProps {
@@ -14,11 +17,7 @@ interface FileUploaderProps {
 
 export default function FileUploader({
     label = "Chọn file",
-    accept = {
-        "application/pdf": [".pdf"],
-        "application/msword": [".doc"],
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"]
-    },
+    accept = { "application/pdf": [".pdf"] },
     file,
     onFileChange,
 }: FileUploaderProps) {
@@ -37,18 +36,24 @@ export default function FileUploader({
         multiple: false,
     });
 
-    // Cho phép Ctrl + V để paste file
+    // ✅ Cho phép dán file từ clipboard (Ctrl+V)
     useEffect(() => {
-        const handlePaste = (e: ClipboardEvent) => {
-            if (e.clipboardData?.files.length) {
-                const pastedFile = e.clipboardData.files[0];
-                if (pastedFile) {
-                    onFileChange(pastedFile);
+        const onPaste = (e: ClipboardEvent) => {
+            const items = e.clipboardData?.items;
+            if (!items) return;
+            for (let i = 0; i < items.length; i++) {
+                const it = items[i];
+                if (it.kind === "file") {
+                    const f = it.getAsFile();
+                    if (f) {
+                        onFileChange(f);
+                        break;
+                    }
                 }
             }
         };
-        window.addEventListener("paste", handlePaste);
-        return () => window.removeEventListener("paste", handlePaste);
+        window.addEventListener("paste", onPaste);
+        return () => window.removeEventListener("paste", onPaste);
     }, [onFileChange]);
 
     return (
@@ -57,17 +62,31 @@ export default function FileUploader({
             <div
                 {...getRootProps()}
                 className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition
-            ${isDragActive ? "border-orange-500 bg-orange-50" : "border-gray-300 bg-gray-50 hover:bg-gray-100"}
-        `}
+          ${isDragActive ? "border-orange-500 bg-orange-50" : "border-gray-300 bg-gray-50 hover:bg-gray-100"}`}
             >
                 <input {...getInputProps()} />
                 {file ? (
-                    <p className="text-sm text-gray-700">
-                        File đã chọn: <span className="font-medium">{file.name}</span>
-                    </p>
+                    <div className="text-sm text-gray-700 flex flex-col items-center space-y-2">
+                        <p>
+                            File đã chọn: <span className="font-medium">{file.name}</span>
+                        </p>
+
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            className="flex items-center space-x-1"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onFileChange(null);
+                            }}
+                        >
+                            <X className="w-4 h-4" />
+                            <span>Xóa file</span>
+                        </Button>
+                    </div>
                 ) : (
                     <p className="text-sm text-gray-500">
-                        Kéo & thả file vào đây, hoặc click để chọn <br />
+                        Kéo & thả file PDF vào đây, hoặc click để chọn <br />
                         (Hỗ trợ Ctrl + V để dán file từ clipboard)
                     </p>
                 )}

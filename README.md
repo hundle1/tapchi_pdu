@@ -20,45 +20,6 @@ Website cho phép sinh viên đọc các số tạp chí mới nhất, đồng t
 
 ## 📂 Cấu trúc CSDL (Prisma Schema)
 
-```prisma
-model TapChi {
-  id          String   @id @default(cuid())
-  tieuDe      String
-  moTa        String?
-  anhBia      String?      // ảnh bìa
-  fileUpload  File?        @relation(fields: [fileUploadId], references: [id])
-  fileUploadId String?     
-  pages       Page[]       
-  trangThai   String       @default("draft") // draft | published
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-}
-
-model Page {
-  id        String   @id @default(cuid())
-  soTrang   Int
-  imageUrl  String?     
-  noiDung   String?     
-  tapChi    TapChi       @relation(fields: [tapChiId], references: [id])
-  tapChiId  String
-}
-
-model File {
-  id        String   @id @default(cuid())
-  fileName  String
-  fileType  String
-  fileUrl   String   // link Supabase/local
-  createdAt DateTime @default(now())
-}
-
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  role      String   @default("student") // student | admin
-  createdAt DateTime @default(now())
-}
-```
 
 ## ✨ Tính năng chính
 ## 👩‍🎓 Đối với sinh viên

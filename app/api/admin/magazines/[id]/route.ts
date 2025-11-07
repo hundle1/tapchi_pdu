@@ -1,3 +1,4 @@
+// \tapchi_pdu\app\api\admin\magazines\[id]\route.ts
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
@@ -71,7 +72,6 @@ export async function PUT(
       anhBiaLocal,
       anhBiaUrl,
       trangThai,
-      soTrang,
       tenTacGia,
       ngayXuatBan,
       categories, // array id category
@@ -89,7 +89,6 @@ export async function PUT(
         anhBiaLocal: anhBiaLocal?.trim() || null,
         anhBiaUrl: anhBiaUrl?.trim() || null,
         trangThai: trangThai || 'draft',
-        soTrang: soTrang ?? undefined,
         tenTacGia: tenTacGia?.trim() || null,
         ngayXuatBan: ngayXuatBan ? new Date(ngayXuatBan) : null,
         updatedAt: new Date(),

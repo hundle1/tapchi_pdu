@@ -1,3 +1,5 @@
+// tapchi_pdu\app\admin\addnew\page.tsx
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -26,11 +28,12 @@ export default function AddNewMagazinePage() {
   const [allMajors, setAllMajors] = useState<{ id: string; name: string }[]>([]);
   const [formData, setFormData] = useState({
     tieuDe: '',
-    tenTacgia: 'Admin',
+    tenTacGia: 'Admin',
     moTa: '',
-    anhBia: '',
+    anhBiaLocal: '',
+    anhBiaUrl: '',
     ngayXuatBan: new Date().toISOString().split('T')[0],
-    categoryIds: [] as string[],
+    categoryName: [] as string[],
     majorIds: [] as string[],
     trangThai: 'DRAFT',
   });
@@ -80,13 +83,6 @@ export default function AddNewMagazinePage() {
   };
 
 
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -95,13 +91,13 @@ export default function AddNewMagazinePage() {
       return;
     }
 
-    if (!formData.anhBia.trim()) {
+    if (!formData.anhBiaLocal.trim() && !formData.anhBiaUrl.trim()) {
       toast.error('Vui lòng nhập URL ảnh bìa');
       return;
     }
 
     if (!file) {
-      toast.error('Vui lòng upload file PDF hoặc Word');
+      toast.error('Vui lòng upload file PDF');
       return;
     }
 
@@ -110,13 +106,15 @@ export default function AddNewMagazinePage() {
     try {
       const formDataToSend = new FormData();
       formDataToSend.append('tieuDe', formData.tieuDe);
-      formDataToSend.append('tenTacGia', formData.tenTacgia || 'Admin');
+      formDataToSend.append('tenTacGia', formData.tenTacGia || 'Admin');
       formDataToSend.append('moTa', formData.moTa);
-      formDataToSend.append('anhBia', formData.anhBia);
+      formDataToSend.append('anhBiaLocal', formData.anhBiaLocal);
+      formDataToSend.append('anhBiaUrl', formData.anhBiaUrl);
       formDataToSend.append('ngayXuatBan', formData.ngayXuatBan);
       formDataToSend.append('trangThai', formData.trangThai);
-      formData.categoryIds.forEach((id) => formDataToSend.append('categoryIds', id));
+      formData.categoryName.forEach((id) => formDataToSend.append('categoryName', id));
       formData.majorIds.forEach((id) => formDataToSend.append('majorIds', id));
+
       formDataToSend.append('file', file);
 
 
@@ -242,9 +240,9 @@ export default function AddNewMagazinePage() {
                     <Label htmlFor="tenTacGia">Tên tác giả*</Label>
                     <Input
                       id="tenTacGia"
-                      value={formData.tenTacgia}
+                      value={formData.tenTacGia}
                       onChange={(e) =>
-                        setFormData({ ...formData, tenTacgia: e.target.value })
+                        setFormData({ ...formData, tenTacGia: e.target.value })
                       }
                       placeholder="Nhập tên tác giả"
                       required
@@ -269,8 +267,8 @@ export default function AddNewMagazinePage() {
                     <MultiSelect
                       label="Danh mục sách"
                       options={allCategories} // [{id, name}, ...]
-                      selectedIds={formData.categoryIds}
-                      onChange={(ids) => setFormData({ ...formData, categoryIds: ids })}
+                      selectedIds={formData.categoryName}
+                      onChange={(ids) => setFormData({ ...formData, categoryName: ids })}
                     />
                     <MultiSelect
                       label="Khoa/Ngành"
@@ -313,9 +311,12 @@ export default function AddNewMagazinePage() {
                 {/* Cột phải */}
                 <div className="flex flex-col space-y-4">
                   <CoverImagePicker
-                    value={formData.anhBia}
-                    onChange={(val) => setFormData({ ...formData, anhBia: val })}
+                    localValue={formData.anhBiaLocal}
+                    urlValue={formData.anhBiaUrl}
+                    onLocalChange={(val) => setFormData({ ...formData, anhBiaLocal: val })}
+                    onUrlChange={(val) => setFormData({ ...formData, anhBiaUrl: val })}
                   />
+
                 </div>
               </div>
             </CardContent>
@@ -323,15 +324,13 @@ export default function AddNewMagazinePage() {
           {/* File Upload */}
           <Card>
             <CardHeader>
-              <CardTitle>Tải lên file PDF/Word</CardTitle>
+              <CardTitle>Tải lên file PDF</CardTitle>
             </CardHeader>
             <CardContent>
               <FileUploader
                 label="Chọn file *"
                 accept={{
-                  'application/pdf': [],
-                  'application/msword': [],
-                  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': []
+                  'application/pdf': []
                 }}
                 file={file}
                 onFileChange={setFile}

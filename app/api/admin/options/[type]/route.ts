@@ -20,12 +20,12 @@ async function checkAdminAuth() {
 }
 
 // GET: lấy danh sách theo type
-export async function GET(req: Request, { params }: { params: { type: string } }) {
+export async function GET(req: Request, context: { params: Promise<{ type: string }> }) {
     try {
         const user = await checkAdminAuth();
         if (!user) return NextResponse.json({ error: 'Không có quyền truy cập' }, { status: 401 });
-
-        const { type } = params;
+        const { params } = context;
+        const { type } = await params;
         let data;
 
         if (type === 'category') {
