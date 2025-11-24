@@ -11,7 +11,9 @@ interface MagazineCardProps {
     id: string;
     tieuDe: string;
     moTa: string | null;
-    anhBia: string;
+    anhBiaUrl: string;
+    anhBiaLocal: string;
+    createdAt: Date;
     trangThai: string;
   };
 }
@@ -21,14 +23,12 @@ export function MagazineCard({ magazine }: MagazineCardProps) {
     <Card className="relative overflow-visible transition-all duration-300 hover:shadow-lg group/hover-zone">
       {/* Ảnh bìa */}
       <Link href={`/magazine/${magazine.id}`}>
-        <div className="relative aspect-[3/4] overflow-hidden rounded-lg cursor-pointer">
+        <div className="relative aspect-[6/8] overflow-hidden rounded-lg cursor-pointer">
           <Image
-            src={magazine.anhBia && magazine.anhBia.trim() !== ""
-              ? magazine.anhBia
-              : "/placeholder-magazine.jpg"}
+            src={magazine.anhBiaUrl?.trim() || magazine.anhBiaLocal?.trim() || "/placeholder-magazine.jpg"}
             alt={magazine.tieuDe || "Magazine cover"}
             fill
-            className="object-cover group-hover/hover-zone:scale-105 transition-transform duration-500"
+            className=" object-center group-hover/hover-zone:scale-105 transition-transform duration-500"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
           />
 
@@ -44,7 +44,7 @@ export function MagazineCard({ magazine }: MagazineCardProps) {
 
       {/* Panel thông tin */}
       <div
-        className="absolute left-full top-0 h-full w-[500px] bg-white border rounded-lg shadow-xl p-6
+        className="absolute left-full top-0 h-full w-[320px] bg-white border rounded-lg shadow-xl p-6
                opacity-0 invisible translate-x-4
                group-hover/hover-zone:opacity-100 group-hover/hover-zone:visible group-hover/hover-zone:translate-x-0
                transition-all duration-200 ease-in-out z-50 flex flex-col justify-between"
