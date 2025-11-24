@@ -165,7 +165,7 @@ export default function AdminHomePage() {
         </header>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 ">
           <Card className="shadow-md border-l-4 border-orange-500">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Tổng số</CardTitle>
@@ -260,17 +260,17 @@ export default function AdminHomePage() {
           <CardContent>
             {/* Grid View */}
             {viewMode === 'grid' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6 gap-6">
                 {currentMagazines.map((magazine) => (
                   <Card key={magazine.id} className="group hover:shadow-lg transition-shadow duration-200">
                     <CardContent className="p-0">
                       {/* Cover Image */}
-                      <div className="relative h-96 w-72 overflow-hidden rounded-t-lg bg-gray-100">
+                      <div className="relative aspect-[2/3] overflow-hidden rounded-t-lg bg-gray-100 flex items-center justify-center">
                         <Image
                           src={magazine.anhBia || '/placeholder-magazine.jpg'}
                           alt={magazine.tieuDe}
                           fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="object-contain p-2 transition-transform duration-300 group-hover:scale-105"
                         />
                         <div className="absolute top-2 right-2">
                           <Badge variant={magazine.trangThai === 'PUBLISHED' ? 'default' : 'secondary'}>
@@ -292,10 +292,10 @@ export default function AdminHomePage() {
                               {magazine.tenTacGia || magazine.TaiKhoanNguoiDung.name || magazine.TaiKhoanNguoiDung.email}
                             </span>
                           </p>
-                          <p className="flex items-center gap-1">
+                          {/* <p className="flex items-center gap-1">
                             <span className="font-medium">Ngành:</span>
                             <Badge variant="outline" className="text-xs">{magazine.major}</Badge>
-                          </p>
+                          </p> */}
                         </div>
 
                         {/* Actions */}

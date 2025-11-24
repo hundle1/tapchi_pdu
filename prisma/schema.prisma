@@ -36,8 +36,8 @@ model Magazine {
   ngayXuatBan         DateTime?
   TaiKhoanNguoiDung   TaiKhoanNguoiDung? @relation(fields: [taiKhoanNguoiDungId], references: [id])
   taiKhoanNguoiDungId String?
-  categoryName        Category[]         @relation("MagazineCategories") // 👈 đặt tên
-  major               Major[]            @relation("MagazineMajors") // 👈 đặt tên
+  categoryName        Category[]         @relation("MagazineCategories")
+  major               Major[]            @relation("MagazineMajors")
   readCount           Int                @default(0)
   likeCount           Int                @default(0)
   createdAt           DateTime           @default(now())
@@ -49,7 +49,7 @@ model Category {
   name      String     @unique
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
-  magazines Magazine[] @relation("MagazineCategories") // 👈 khớp tên
+  magazines Magazine[] @relation("MagazineCategories")
 }
 
 model Major {
@@ -57,14 +57,14 @@ model Major {
   name      String     @unique
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
-  magazines Magazine[] @relation("MagazineMajors") // 👈 khớp tên
+  magazines Magazine[] @relation("MagazineMajors")
 }
 
 model File {
   id        String     @id @default(cuid())
   fileName  String
   fileType  String
-  fileUrl   String // link Supabase S3 hoặc local storage
+  fileUrl   String
   createdAt DateTime   @default(now())
   Magazine  Magazine[]
 }

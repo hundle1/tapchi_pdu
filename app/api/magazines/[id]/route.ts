@@ -1,3 +1,6 @@
+//\tapchi_pdu\app\api\magazines\[id]\route.ts
+
+
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 

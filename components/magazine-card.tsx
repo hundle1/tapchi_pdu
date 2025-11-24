@@ -16,8 +16,7 @@ interface MagazineCardProps {
   };
 }
 
-export async function MagazineCard({ magazine }: MagazineCardProps) {
-
+export function MagazineCard({ magazine }: MagazineCardProps) {
   return (
     <Card className="relative overflow-visible transition-all duration-300 hover:shadow-lg group/hover-zone">
       {/* Ảnh bìa */}
@@ -50,17 +49,17 @@ export async function MagazineCard({ magazine }: MagazineCardProps) {
                group-hover/hover-zone:opacity-100 group-hover/hover-zone:visible group-hover/hover-zone:translate-x-0
                transition-all duration-200 ease-in-out z-50 flex flex-col justify-between"
       >
-        <h3 className="font-semibold text-lg mb-3 text-orange-800">
-          {magazine.tieuDe}
-        </h3>
-        {magazine.moTa && (
-          <p className="text-sm text-gray-600 mb-4 whitespace-pre-line text-justify">
-            {magazine.moTa}
-          </p>
-        )}
         <div>
-          <p className="text-xs text-gray-500 mb-6">
-          </p>
+          <h3 className="font-semibold text-lg mb-3 text-orange-800">
+            {magazine.tieuDe}
+          </h3>
+          {magazine.moTa && (
+            <p className="text-sm text-gray-600 mb-4 whitespace-pre-line text-justify">
+              {magazine.moTa}
+            </p>
+          )}
+        </div>
+        <div>
           <Link href={`/magazine/${magazine.id}`}>
             <Button className="w-full bg-orange-600 hover:bg-orange-700">
               Xem tạp chí

@@ -51,12 +51,12 @@ export async function GET() {
       id: mag.id,
       tieuDe: mag.tieuDe,
       moTa: mag.moTa,
-      anhBia: mag.anhBiaUrl || mag.anhBiaLocal || '/placeholder-magazine.jpg', // ✅ Combine 2 field sẽ tốt hơn là để trống
+      anhBia: mag.anhBiaUrl || mag.anhBiaLocal || '/placeholder-magazine.jpg', // ✅ Combine 2 field
       trangThai: mag.trangThai,
       createdAt: mag.createdAt,
       TaiKhoanNguoiDung: mag.TaiKhoanNguoiDung,
-      major: mag.major.length > 0 ? mag.major[0].name : 'Chưa phân loại', // ✅ Lấy major đầu tiên để tránh mảng rỗng
-      pages: [], // ✅ Placeholder vì schema không có pages để tránh lỗi frontend
+      major: mag.major.length > 0 ? mag.major[0].name : 'Chưa phân loại', // ✅ Lấy major đầu tiên
+      pages: [], // ✅ Placeholder vì schema không có pages
       tenTacGia: mag.tenTacGia,
       fileUpload: mag.fileUpload,
       categoryName: mag.categoryName,
@@ -192,7 +192,7 @@ export async function POST(req: Request) {
 
       console.log('✅ File record created:', fileRecord.id);
 
-      // Tạo record Magazine
+      // Tạo record Magazine (không include relations để nhanh hơn)
       const magazine = await tx.magazine.create({
         data: {
           tieuDe,
@@ -211,19 +211,29 @@ export async function POST(req: Request) {
             connect: majorIds.map((id) => ({ id })),
           },
         },
-        include: {
-          fileUpload: true,
-          TaiKhoanNguoiDung: {
-            select: { name: true, email: true }
-          },
-          categoryName: true,
-          major: true,
-        },
       });
 
       console.log('✅ Magazine created:', magazine.id);
-      return magazine;
+      return magazine.id;
+    }, {
+      maxWait: 10000, // Tăng thời gian chờ lên 10 giây
+      timeout: 15000, // Timeout sau 15 giây
     });
+
+    // Fetch đầy đủ data sau khi transaction hoàn tất
+    const magazineWithRelations = await prisma.magazine.findUnique({
+      where: { id: result },
+      include: {
+        fileUpload: true,
+        TaiKhoanNguoiDung: {
+          select: { name: true, email: true }
+        },
+        categoryName: true,
+        major: true,
+      },
+    });
+
+    return NextResponse.json(magazineWithRelations);
 
     return NextResponse.json(result);
 

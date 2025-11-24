@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 import { MagazineCard } from '@/components/magazine-card';
 import { Button } from '@/components/ui/button';
@@ -38,6 +39,13 @@ export default function MagazineListPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('createdAt');
 
+  const searchParams = useSearchParams();
+  const keyword = searchParams.get('keyword') || '';
+
+  useEffect(() => {
+    setSearchTerm(keyword);
+  }, [keyword]);
+
   useEffect(() => {
     fetchMagazines();
   }, []);
@@ -64,7 +72,6 @@ export default function MagazineListPage() {
       magazine.tieuDe.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Sort magazines
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'tieuDe':
@@ -91,6 +98,14 @@ export default function MagazineListPage() {
           <p className="text-orange-600">
             Khám phá toàn bộ bộ sưu tập tạp chí văn hóa phương đông
           </p>
+
+          {keyword && (
+            <div className="mt-3">
+              <span className="inline-block bg-orange-100 text-orange-800 px-4 py-1 rounded-full text-sm font-medium">
+                Tìm kiếm cho: “{keyword}”
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Filter Controls */}

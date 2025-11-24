@@ -1,82 +1,190 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { Menu, X, BookOpen } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
+import { Menu, X, Moon, Sun, Users } from 'lucide-react';
+import { SearchButton } from '@/components/SearchButton';
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import Image from 'next/image';
+import Link from 'next/link';
 
 const navigation = [
-  { name: 'Trang chủ', href: '/' },
-  { name: 'Danh sách tạp chí', href: '/magazine' },
+  { name: 'TRANG CHỦ', href: '/' },
+  { name: 'DANH MỤC', href: '/magazine' },
+  { name: 'TÍNH NĂNG', href: '/features' },
 ];
 
-export function Navbar() {
+interface NavbarProps {
+  isDarkMode?: boolean;
+  onToggleTheme?: () => void;
+}
+
+export function Navbar({ isDarkMode = false, onToggleTheme }: NavbarProps) {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 1);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <nav className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-orange-200 sticky top-0 z-40">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2">
-              <BookOpen className="h-8 w-8 text-orange-600" />
-              <span className="font-bold text-xl text-orange-800 hidden sm:block">
-                Tạp Chí Phương Đông
-              </span>
-            </Link>
-          </div>
+    <nav
+      className={`backdrop-blur-sm border-b sticky top-0 z-50 transition-all duration-300 ${isDarkMode
+        ? 'bg-black/40 border-white/10'
+        : 'bg-white/95 border-gray-200'
+        } ${scrolled ? 'h-16 md:h-20' : 'h-28 md:h-28'}`}
+    >
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-full">
+        <div className="flex justify-between items-center h-full relative">
+          {/* Mobile Menu */}
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <button
+                className={`p-2 transition-colors md:hidden ${isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}
+                aria-label="Toggle menu"
+              >
+                {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </SheetTrigger>
+            <SheetContent
+              side="left"
+              className={`w-[300px] sm:w-[400px] transition-colors duration-700 ${isDarkMode
+                ? 'bg-slate-900 border-white/10 text-white'
+                : 'bg-white border-gray-200'
+                }`}
+            >
+              <div className="flex flex-col space-y-6 mt-8">
+                <div className="flex flex-col items-center pb-6 border-b border-gray-200 dark:border-white/10">
+                  <div
+                    className={`text-xl font-serif font-bold tracking-wider text-center ${isDarkMode ? 'text-white' : 'text-gray-900'
+                      }`}
+                  >
+                    PHƯƠNG ĐÔNG UNIVERSITY
+                  </div>
+                  <div
+                    className={`text-xs tracking-widest mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                      }`}
+                  >
+                    TẠP CHÍ & VĂN HÓA
+                  </div>
+                </div>
+                {navigation.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`text-sm font-medium transition-colors px-4 py-2 rounded-lg ${isDarkMode
+                      ? 'text-gray-200 hover:text-white hover:bg-white/5'
+                      : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                      }`}
+                    onClick={() => setOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            </SheetContent>
+          </Sheet>
 
-          {/* Desktop navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          {/* Desktop Navigation - Left */}
+          <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-orange-700 hover:text-orange-900 px-3 py-2 text-sm font-medium transition-colors"
+                className={`hover:scale-125 text-xs lg:text-sm font-medium transition-transform duration-300 ease-out ${isDarkMode
+                  ? 'text-gray-300 hover:text-white'
+                  : 'text-gray-700 hover:text-gray-900'
+                  }`}
               >
                 {item.name}
               </Link>
             ))}
-            <Link href="/admin">
-              <Button variant="outline" size="sm" className="border-orange-300 text-orange-700 hover:bg-orange-100">
-                Admin
-              </Button>
+          </div>
+
+          {/* Logo - Centered */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 top-0 flex flex-col items-center transition-all duration-300">
+            <Link href="/" className="flex flex-col items-center">
+              {/* Text Logo */}
+              <div
+                className={`font-bold tracking-wider text-center transition-all duration-300 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                  } ${scrolled
+                    ? 'text-sm md:text-base mt-2 md:mt-3'
+                    : 'text-base md:text-2xl lg:text-3xl mt-3 md:mt-5'
+                  }`}
+              >
+                TẠP CHÍ PHƯƠNG ĐÔNG
+              </div>
+
+              <div
+                className={`tracking-widest text-center transition-all duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                  } ${scrolled
+                    ? 'text-[8px] md:text-[10px] mt-0.5'
+                    : 'text-[10px] md:text-xs mt-1'
+                  }`}
+              >
+                TẠP CHÍ & VĂN HÓA
+              </div>
+
+              {/* Logo Image - Slide up on scroll (faster animation) */}
+              <div
+                className={`relative bg-white rounded-bl-full rounded-br-full overflow-hidden transition-all duration-200 ${scrolled
+                  ? 'w-0 h-0 opacity-0 -translate-y-full'
+                  : 'w-32 h-20 md:w-44 md:h-28 opacity-100 translate-y-0'
+                  } ${isDarkMode ? 'bg-black' : 'bg-white'}
+                  `}
+              >
+                <Image
+                  src="/assets/pdulogo.png"
+                  alt="PDU Logo"
+                  fill
+                  className="object-contain pb-2 md:pb-3"
+                  priority
+                />
+              </div>
             </Link>
           </div>
 
-          {/* Mobile navigation */}
-          <div className="md:hidden">
-            <Sheet open={open} onOpenChange={setOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <Menu className="h-6 w-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-                <div className="flex flex-col space-y-4 mt-6">
-                  {navigation.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className="text-lg font-medium text-orange-700 hover:text-orange-900 transition-colors"
-                      onClick={() => setOpen(false)}
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
-                  <Link href="/admin" onClick={() => setOpen(false)}>
-                    <Button variant="outline" className="w-full border-orange-300 text-orange-700 hover:bg-orange-100">
-                      Admin
-                    </Button>
-                  </Link>
-                </div>
-              </SheetContent>
-            </Sheet>
+          {/* Right Icons */}
+          <div className="flex items-center space-x-2 md:space-x-4">
+            <SearchButton />
+
+            {onToggleTheme && (
+              <button
+                onClick={onToggleTheme}
+                className={`p-1.5 md:p-2 rounded-full transition-all ${isDarkMode
+                  ? 'bg-yellow-500/20 hover:bg-yellow-500/30'
+                  : 'bg-gray-200 hover:bg-gray-300'
+                  }`}
+                aria-label="Toggle theme"
+              >
+                {isDarkMode ? (
+                  <Sun className="w-4 h-4 md:w-5 md:h-5 text-yellow-400" />
+                ) : (
+                  <Moon className="w-4 h-4 md:w-5 md:h-5 text-gray-700" />
+                )}
+              </button>
+            )}
+
+            <Link href="/admin">
+              <button
+                className={`hidden md:block transition-colors ${isDarkMode
+                  ? 'text-gray-300 hover:text-white'
+                  : 'text-gray-700 hover:text-gray-900'
+                  }`}
+                aria-label="Users"
+              >
+                <Users className="w-5 h-5" />
+              </button>
+            </Link>
           </div>
         </div>
       </div>
