@@ -43,6 +43,9 @@ model Magazine {
   likeCount           Int                @default(0)
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
+
+  @@index([fileUploadId])
+  @@index([taiKhoanNguoiDungId])
 }
 
 model Category {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X, Moon, Sun, Users } from 'lucide-react';
+import { Menu, X, Moon, Sun, Users, Search } from 'lucide-react';
 import { SearchButton } from '@/components/SearchButton';
 import {
   Sheet,
@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/sheet';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const navigation = [
   { name: 'TRANG CHỦ', href: '/' },
@@ -25,6 +26,8 @@ interface NavbarProps {
 export function Navbar({ isDarkMode = false, onToggleTheme }: NavbarProps) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [mobileQuery, setMobileQuery] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -34,6 +37,19 @@ export function Navbar({ isDarkMode = false, onToggleTheme }: NavbarProps) {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleMobileSearch = () => {
+    if (!mobileQuery.trim()) return;
+    router.push(`/magazine?keyword=${encodeURIComponent(mobileQuery.trim())}`);
+    setOpen(false);
+    setMobileQuery('');
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleMobileSearch();
+    }
+  };
 
   return (
     <nav
@@ -77,6 +93,38 @@ export function Navbar({ isDarkMode = false, onToggleTheme }: NavbarProps) {
                     TẠP CHÍ & VĂN HÓA
                   </div>
                 </div>
+
+                {/* Mobile Search */}
+                <div className="px-4">
+                  <div className={`flex items-center bg-gray-100 rounded-full px-4 py-3 ${isDarkMode ? 'bg-white/10' : 'bg-gray-100'}`}>
+                    <Search className="w-5 h-5 text-gray-500 mr-3 flex-shrink-0" />
+                    <input
+                      type="text"
+                      placeholder="Tìm kiếm..."
+                      value={mobileQuery}
+                      onChange={(e) => setMobileQuery(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      className={`flex-1 bg-transparent border-none outline-none ${isDarkMode ? 'text-white placeholder-gray-400' : 'text-gray-900 placeholder-gray-500'}`}
+                    />
+                    {mobileQuery.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setMobileQuery('')}
+                        className={`ml-2 p-1 rounded-full transition ${isDarkMode ? 'hover:bg-white/20' : 'hover:bg-gray-200'}`}
+                      >
+                        <X className="w-4 h-4 text-gray-500" />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleMobileSearch}
+                      className={`ml-3 px-4 py-1 rounded-full text-sm transition ${isDarkMode ? 'text-white hover:bg-white/20' : 'text-gray-900 hover:bg-gray-200'}`}
+                    >
+                      Tìm
+                    </button>
+                  </div>
+                </div>
+
                 {navigation.map((item) => (
                   <Link
                     key={item.name}
@@ -155,7 +203,8 @@ export function Navbar({ isDarkMode = false, onToggleTheme }: NavbarProps) {
 
           {/* Right Icons */}
           <div className="flex items-center space-x-2 md:space-x-4">
-            <SearchButton />
+            <SearchButton isDarkMode={isDarkMode} />
+
 
             {onToggleTheme && (
               <button
