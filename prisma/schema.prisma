@@ -1,11 +1,12 @@
+// D:\NCHK\master_degree\tapchi_pdu\prisma\schema.prisma
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["relationJoins"]
 }
 
 datasource db {
-  provider = "sqlserver"
-  url      = env("DATABASE_URL")
+  provider     = "sqlserver"
+  relationMode = "prisma"
 }
 
 model TaiKhoanNguoiDung {

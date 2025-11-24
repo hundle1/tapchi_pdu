@@ -1,3 +1,4 @@
+// D:\NCHK\master_degree\tapchi_pdu\prisma\seed.ts
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
