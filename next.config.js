@@ -26,29 +26,35 @@ const nextConfig = {
     ],
   },
 
-  // ✅ Webpack config để fix lỗi canvas
+  // ✅ CRITICAL: Webpack config để fix pdfjs-dist
   webpack: (config, { isServer }) => {
-    // Thêm externals cho canvas
+    // ✅ Externalize canvas và encoding
     config.externals = config.externals || [];
     config.externals.push({
       canvas: 'canvas',
       encoding: 'encoding',
     });
 
-    // Disable node modules cho client
+    // ✅ QUAN TRỌNG: Ignore pdfjs-dist trên client-side
     if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
+      config.resolve.alias = {
+        ...config.resolve.alias,
         canvas: false,
         encoding: false,
+      };
+
+      // ✅ Fix cho pdfjs-dist
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
         fs: false,
         net: false,
         tls: false,
-        child_process: false,
+        canvas: false,
+        encoding: false,
       };
     }
 
-    // Ignore canvas module
+    // ✅ Ignore node modules
     config.module = config.module || {};
     config.module.rules = config.module.rules || [];
     config.module.rules.push({
@@ -73,12 +79,17 @@ const nextConfig = {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
           },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
         ],
       },
     ];
   },
 };
 
+// ✅ Clean pdf-parse test folder
 const path = require('path');
 const fs = require('fs');
 
