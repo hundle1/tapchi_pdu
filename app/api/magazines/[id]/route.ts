@@ -1,24 +1,31 @@
-//\tapchi_pdu\app\api\magazines\[id]\route.ts
-
+// D:\NCHK\master_degree\tapchi_pdu\app\api\magazines\[id]\route.ts
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // FIX: Await params trước khi sử dụng
+    const { id } = await params;
+
     const magazine = await prisma.magazine.findUnique({
       where: {
-        id: params.id,
+        id: id,
       },
       include: {
-
         TaiKhoanNguoiDung: {
           select: {
             name: true,
             email: true
+          }
+        },
+        fileUpload: true,
+        pages: {
+          orderBy: {
+            pageNumber: 'asc'
           }
         }
       }
@@ -31,13 +38,13 @@ export async function GET(
       );
     }
 
-    // Only return published magazines for public access
-    if (magazine.trangThai !== 'PUBLISHED') {
-      return NextResponse.json(
-        { error: 'Magazine not available' },
-        { status: 403 }
-      );
-    }
+    console.log('Magazine data:', {
+      id: magazine.id,
+      title: magazine.tieuDe,
+      hasFileUpload: !!magazine.fileUpload,
+      fileUrl: magazine.fileUpload?.fileUrl,
+      pagesCount: magazine.pages?.length || 0
+    });
 
     return NextResponse.json(magazine);
   } catch (error) {

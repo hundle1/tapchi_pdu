@@ -1,11 +1,14 @@
+// D:\NCHK\master_degree\tapchi_pdu\app\magazine\[id]\page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
-import { MagazineReader } from '@/components/magazine-reader';
 import { useLoading } from '@/components/loading-provider';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { AlertCircle } from 'lucide-react';
+import { PDFMagazineReader } from '@/components/magazine-reader';
 
 interface Page {
   id: string;
@@ -18,10 +21,16 @@ interface Magazine {
   id: string;
   tieuDe: string;
   moTa: string | null;
-  anhBia: string;
+  anhBiaUrl: string;
+  anhBiaLocal: string;
   createdAt: Date;
   trangThai: string;
   pages: Page[];
+  fileUpload?: {
+    fileUrl: string;
+    fileName: string;
+  };
+  needsConversion?: boolean;
 }
 
 export default function MagazineDetailPage() {
@@ -104,22 +113,39 @@ export default function MagazineDetailPage() {
     );
   }
 
+  // Debug log
+  console.log('Magazine state:', {
+    hasMagazine: !!magazine,
+    hasFileUpload: !!magazine?.fileUpload,
+    fileUrl: magazine?.fileUpload?.fileUrl,
+    magazineData: magazine
+  });
+
   return (
     <div className="min-h-screen bg-black">
       <Navbar />
       <main className="py-4">
-        {magazine?.pages && magazine.pages.length > 0 ? (
-          <MagazineReader
-            pages={[...magazine.pages].sort((a, b) => a.pageNumber - b.pageNumber)}
+        {magazine?.fileUpload?.fileUrl ? (
+          <PDFMagazineReader
+            pdfUrl={magazine.fileUpload.fileUrl}
             title={magazine.tieuDe}
           />
         ) : (
-          <div className="flex items-center justify-center min-h-[400px] text-gray-500">
-            Chưa có trang nào để hiển thị
+          <div className="flex flex-col items-center justify-center min-h-[400px] text-white">
+            <AlertCircle className="h-12 w-12 mb-4 text-gray-400" />
+            <p className="text-gray-400 mb-4">Không tìm thấy file PDF</p>
+            <p className="text-sm text-gray-500">
+              {magazine ? 'Vui lòng upload file PDF cho tạp chí này' : 'Đang tải...'}
+            </p>
+            {/* Debug info */}
+            <div className="mt-4 text-xs text-gray-600 font-mono">
+              <p>Magazine ID: {magazine?.id}</p>
+              <p>Has fileUpload: {magazine?.fileUpload ? 'Yes' : 'No'}</p>
+              <p>File URL: {magazine?.fileUpload?.fileUrl || 'None'}</p>
+            </div>
           </div>
         )}
       </main>
     </div>
-
   );
 }

@@ -34,7 +34,7 @@ function MagazineCardSkeleton() {
   );
 }
 
-const ITEMS_PER_PAGE = 30; // 5 cột x 6 hàng
+const ITEMS_PER_PAGE = 30;
 
 export default function MagazineListPage() {
   const [magazines, setMagazines] = useState<Magazine[]>([]);
@@ -70,15 +70,36 @@ export default function MagazineListPage() {
     try {
       const response = await fetch('/api/magazines');
       const data = await response.json();
-      setMagazines(data);
+
+      // FIX: Đảm bảo data là array
+      console.log('API Response:', data); // Debug log
+
+      if (Array.isArray(data)) {
+        setMagazines(data);
+      } else if (data && typeof data === 'object') {
+        // Nếu API trả về object, tìm property chứa array
+        const magazinesArray = data.magazines || data.data || [];
+        setMagazines(Array.isArray(magazinesArray) ? magazinesArray : []);
+      } else {
+        console.error('Invalid data format:', data);
+        setMagazines([]);
+      }
     } catch (error) {
       console.error('Error fetching magazines:', error);
+      setMagazines([]);
     } finally {
       setLoading(false);
     }
   };
 
   const filterMagazines = () => {
+    // FIX: Kiểm tra magazines là array trước khi filter
+    if (!Array.isArray(magazines)) {
+      console.error('magazines is not an array:', magazines);
+      setFilteredMagazines([]);
+      return;
+    }
+
     let filtered = magazines.filter(magazine =>
       magazine.trangThai === 'PUBLISHED' &&
       magazine.tieuDe.toLowerCase().includes(activeSearchTerm.toLowerCase())
@@ -134,30 +155,24 @@ export default function MagazineListPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Tạo array các số trang hiển thị
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
 
     if (totalPages <= 7) {
-      // Hiển thị tất cả nếu ít hơn 7 trang
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Luôn hiển thị trang đầu
       pages.push(1);
 
       if (currentPage <= 3) {
-        // Gần đầu: [1] [2] [3] [4] ... [x-2] [x-1] [x]
         pages.push(2, 3, 4);
         pages.push('...');
         pages.push(totalPages - 2, totalPages - 1, totalPages);
       } else if (currentPage >= totalPages - 2) {
-        // Gần cuối: [1] ... [x-3] [x-2] [x-1] [x]
         pages.push('...');
         pages.push(totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
       } else {
-        // Ở giữa: [1] ... [current-1] [current] [current+1] ... [x-2] [x-1] [x]
         pages.push('...');
         pages.push(currentPage - 1, currentPage, currentPage + 1);
         pages.push('...');
@@ -178,7 +193,7 @@ export default function MagazineListPage() {
           <h1 className="text-3xl md:text-4xl font-bold mb-2">
             Danh sách tạp chí
           </h1>
-          <p className=" text-sm md:text-base">
+          <p className="text-sm md:text-base">
             Khám phá toàn bộ bộ sưu tập tạp chí văn hóa phương đông
           </p>
         </div>
@@ -293,7 +308,6 @@ export default function MagazineListPage() {
             {totalPages > 1 && (
               <div className="flex justify-center mt-8">
                 <div className="inline-flex items-center gap-1 bg-white rounded-lg shadow-md p-2">
-                  {/* First Page */}
                   <Button
                     variant="ghost"
                     size="icon"
@@ -305,7 +319,6 @@ export default function MagazineListPage() {
                     <ChevronsLeft className="h-4 w-4" />
                   </Button>
 
-                  {/* Previous Page */}
                   <Button
                     variant="ghost"
                     size="icon"
@@ -317,7 +330,6 @@ export default function MagazineListPage() {
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
 
-                  {/* Page Numbers */}
                   <div className="flex items-center gap-1 mx-2">
                     {getPageNumbers().map((page, index) => (
                       page === '...' ? (
@@ -341,7 +353,6 @@ export default function MagazineListPage() {
                     ))}
                   </div>
 
-                  {/* Next Page */}
                   <Button
                     variant="ghost"
                     size="icon"
@@ -353,7 +364,6 @@ export default function MagazineListPage() {
                     <ChevronRight className="h-4 w-4" />
                   </Button>
 
-                  {/* Last Page */}
                   <Button
                     variant="ghost"
                     size="icon"

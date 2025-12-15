@@ -1,4 +1,4 @@
-// \tapchi_pdu\app\api\magazines\route.ts
+// app/api/magazines/route.ts
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
@@ -19,9 +19,14 @@ export async function GET() {
             email: true
           }
         },
+        fileUpload: true,
       }
     });
 
+    // Debug log
+    console.log('Fetched magazines count:', magazines.length);
+
+    // Đảm bảo trả về array
     return NextResponse.json(magazines);
   } catch (error) {
     console.error('Error fetching magazines:', error);

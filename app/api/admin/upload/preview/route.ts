@@ -1,59 +1,90 @@
-// app/api/admin/upload/preview/route.ts
-import { NextResponse } from "next/server";
-import pdfParse from "pdf-parse";
+// D:\NCHK\master_degree\tapchi_pdu\app\api\magazines\upload\route.ts
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { writeFile, mkdir } from 'fs/promises';
+import { existsSync } from 'fs';
+import path from 'path';
+import { PDFDocument } from 'pdf-lib';
 
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
     try {
-        const pdf = (await import('pdf-parse')).default;
-        const mammoth = (await import('mammoth')).default;
-        const formData = await req.formData();
-        const file = formData.get("file") as Blob | null;
-        console.log("📄 file debug:", file);
-        if (!file) {
-            return NextResponse.json({ error: "Không nhận được file từ formData" }, { status: 400 });
-        }
-        const filename = formData.get("filename") as string | null;
+        const formData = await request.formData();
+        const file = formData.get('file') as File;
+        const magazineId = formData.get('magazineId') as string;
 
         if (!file) {
-            return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
-        }
-
-        console.log("📥 Received file:", {
-            name: filename,
-            size: (file as any).size,
-            type: (file as any).type,
-        });
-
-        const bytes = await new Response(file).arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        const mime = (file as any).type || "";
-        if (!mime.includes("pdf")) {
             return NextResponse.json(
-                { error: "Only PDF files are supported" },
-                { status: 415 }
+                { error: 'No file uploaded' },
+                { status: 400 }
             );
         }
 
-        let pageCount: number | null = null;
-        try {
-            const data = await pdfParse(buffer);
-            pageCount = data.numpages || null;
-        } catch (e) {
-            console.error("PDF parse error:", e);
-            return NextResponse.json({ error: "Failed to parse PDF" }, { status: 500 });
+        if (!magazineId) {
+            return NextResponse.json(
+                { error: 'Magazine ID required' },
+                { status: 400 }
+            );
         }
 
-        return NextResponse.json({
-            pageCount,
-            detectedType: "pdf",
-            filename: filename || "unknown.pdf",
+        // Convert file to buffer
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+
+        // Verify it's a PDF
+        if (file.type !== 'application/pdf') {
+            return NextResponse.json(
+                { error: 'Only PDF files are allowed' },
+                { status: 400 }
+            );
+        }
+
+        // Load PDF to get page count
+        const pdfDoc = await PDFDocument.load(new Uint8Array(buffer));
+        const pageCount = pdfDoc.getPageCount();
+
+        // Save PDF file
+        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'pdfs');
+        if (!existsSync(uploadDir)) {
+            await mkdir(uploadDir, { recursive: true });
+        }
+
+        const fileName = `${magazineId}-${Date.now()}.pdf`;
+        const filePath = path.join(uploadDir, fileName);
+        await writeFile(filePath, new Uint8Array(buffer));
+
+        const fileUrl = `/uploads/pdfs/${fileName}`;
+
+        // Create File record
+        const fileRecord = await prisma.file.create({
+            data: {
+                fileName: file.name,
+                fileType: file.type,
+                fileUrl: fileUrl
+            }
         });
-    } catch (err) {
-        console.error("Server error:", err);
-        return NextResponse.json({ error: "Server error" }, { status: 500 });
+
+        // Update magazine with file
+        await prisma.magazine.update({
+            where: { id: magazineId },
+            data: {
+                fileUploadId: fileRecord.id
+            }
+        });
+
+        return NextResponse.json({
+            success: true,
+            fileId: fileRecord.id,
+            fileUrl: fileUrl,
+            pageCount: pageCount,
+            message: `PDF uploaded successfully with ${pageCount} pages`
+        });
+
+    } catch (error) {
+        console.error('Upload error:', error);
+        return NextResponse.json(
+            { error: 'Failed to upload file' },
+            { status: 500 }
+        );
     }
 }

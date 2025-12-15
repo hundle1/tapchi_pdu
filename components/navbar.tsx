@@ -53,10 +53,14 @@ export function Navbar({ isDarkMode = false, onToggleTheme }: NavbarProps) {
 
   return (
     <nav
-      className={`backdrop-blur-sm border-b sticky top-0 z-50 transition-all duration-300 ${isDarkMode
-        ? 'bg-black/40 border-white/10'
-        : 'bg-white/95 border-gray-200'
-        } ${scrolled ? 'h-16 md:h-20' : 'h-28 md:h-28'}`}
+      className={`
+        backdrop-blur-sm border-b sticky top-0 z-50 
+        transition-all duration-500 ease-[cubic-bezier(0.22, 1, 0.36, 1)]
+        group
+        ${isDarkMode ? 'bg-black/40 border-white/10' : 'bg-white/95 border-gray-200'}
+        ${scrolled ? 'h-16' : 'h-24'}
+        hover:h-24
+      `}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-full">
         <div className="flex justify-between items-center h-full relative">
@@ -143,15 +147,24 @@ export function Navbar({ isDarkMode = false, onToggleTheme }: NavbarProps) {
           </Sheet>
 
           {/* Desktop Navigation - Left */}
-          <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
+          <div className="
+            hidden md:flex items-center space-x-6 lg:space-x-8 
+            transform-gpu will-change-transform
+            transition-all duration-300 ease-[cubic-bezier(0.22, 1, 0.36, 1)]
+            "
+          >
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`hover:scale-125 text-xs lg:text-sm font-medium transition-transform duration-300 ease-out ${isDarkMode
-                  ? 'text-gray-300 hover:text-white'
-                  : 'text-gray-700 hover:text-gray-900'
-                  }`}
+                className={`
+                  transform-gpu will-change-transform
+                  transition-all duration-200 ease-[cubic-bezier(0.22, 1, 0.36, 1)]
+                  text-xs lg:text-sm font-medium
+                  hover:scale-105
+                  ${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}
+                  ${scrolled ? 'lg:text-xs' : ''}
+                `}
               >
                 {item.name}
               </Link>
@@ -159,11 +172,11 @@ export function Navbar({ isDarkMode = false, onToggleTheme }: NavbarProps) {
           </div>
 
           {/* Logo - Centered */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 top-0 flex flex-col items-center transition-all duration-300">
+          <div className="absolute left-1/2 transform -translate-x-1/2 top-0 flex flex-col items-center transition-all duration-200">
             <Link href="/" className="flex flex-col items-center">
               {/* Text Logo */}
               <div
-                className={`font-bold tracking-wider text-center transition-all duration-300 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                className={`font-bold tracking-wider text-center transition-all duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
                   } ${scrolled
                     ? 'text-sm md:text-base mt-2 md:mt-3'
                     : 'text-base md:text-2xl lg:text-3xl mt-3 md:mt-5'
@@ -173,7 +186,7 @@ export function Navbar({ isDarkMode = false, onToggleTheme }: NavbarProps) {
               </div>
 
               <div
-                className={`tracking-widest text-center transition-all duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                className={`tracking-widest text-center transition-all duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'
                   } ${scrolled
                     ? 'text-[8px] md:text-[10px] mt-0.5'
                     : 'text-[10px] md:text-xs mt-1'
@@ -202,26 +215,31 @@ export function Navbar({ isDarkMode = false, onToggleTheme }: NavbarProps) {
           </div>
 
           {/* Right Icons */}
-          <div className="flex items-center space-x-2 md:space-x-4">
+          <div className="flex items-center space-x-2 md:space-x-4 transition-all duration-500 ">
             <SearchButton isDarkMode={isDarkMode} />
-
 
             {onToggleTheme && (
               <button
                 onClick={onToggleTheme}
-                className={`p-1.5 md:p-2 rounded-full transition-all ${isDarkMode
-                  ? 'bg-yellow-500/20 hover:bg-yellow-500/30'
-                  : 'bg-gray-200 hover:bg-gray-300'
-                  }`}
+                className={`
+                  p-1.5 md:p-2 rounded-full transition-all duration-200
+                  ease-[cubic-bezier(0.22,1,0.36,1)]
+                  cursor-pointer group-hover:shadow-lg
+                  ${isDarkMode
+                    ? 'bg-black text-yellow-400 hover:bg-white hover:text-black'
+                    : 'bg-white text-black hover:bg-black hover:text-white'
+                  }
+                `}
                 aria-label="Toggle theme"
               >
                 {isDarkMode ? (
-                  <Sun className="w-4 h-4 md:w-5 md:h-5 text-yellow-400" />
+                  <Sun className="w-4 h-4 md:w-5 md:h-5" />
                 ) : (
-                  <Moon className="w-4 h-4 md:w-5 md:h-5 text-gray-700" />
+                  <Moon className="w-4 h-4 md:w-5 md:h-5" />
                 )}
               </button>
             )}
+
 
             <Link href="/admin">
               <button

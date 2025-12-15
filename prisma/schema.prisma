@@ -18,7 +18,6 @@ model TaiKhoanNguoiDung {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relations
   magazines Magazine[]
 
   @@map("users")
@@ -44,8 +43,25 @@ model Magazine {
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 
+  // NEW: Relation to pages
+  pages Page[]
+
   @@index([fileUploadId])
   @@index([taiKhoanNguoiDungId])
+}
+
+// NEW: Page model for storing converted PDF pages
+model Page {
+  id         String   @id @default(cuid())
+  magazineId String
+  magazine   Magazine @relation(fields: [magazineId], references: [id], onDelete: Cascade)
+  pageNumber Int
+  imageUrl   String // URL to the converted image
+  content    String? // Optional text content
+  createdAt  DateTime @default(now())
+
+  @@unique([magazineId, pageNumber])
+  @@index([magazineId])
 }
 
 model Category {
