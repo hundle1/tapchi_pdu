@@ -1,3 +1,4 @@
+// D:\NCHK\master_degree\tapchi_pdu\components\PDFMagazineReader.client.tsx
 'use client';
 import React, { useState, useEffect, Suspense } from 'react';
 import {
@@ -59,16 +60,15 @@ if (typeof window !== 'undefined') {
 }
 
 interface PDFMagazineReaderProps {
-    pdfUrl: string;
+    magazineId: string;
     title: string;
-    className?: string;
 }
 
 export default function PDFMagazineReader({
-    pdfUrl,
+    magazineId,
     title,
-    className = ''
 }: PDFMagazineReaderProps) {
+    const pdfUrl = `/api/magazines/${magazineId}/pdf`;
     const [numPages, setNumPages] = useState<number>(0);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [loading, setLoading] = useState(true);
@@ -277,7 +277,7 @@ export default function PDFMagazineReader({
     }
 
     return (
-        <div className={`max-w-6xl mx-auto px-4 ${className}`}>
+        <div className={`max-w-6xl mx-auto px-4`}>
             {/* Header Controls */}
             <div className="flex justify-between items-center mb-4 gap-4 flex-wrap bg-gray-800/50 backdrop-blur-sm rounded-lg p-3">
                 {/* Page Pills */}
@@ -420,8 +420,8 @@ export default function PDFMagazineReader({
                     >
                         <PDFPage
                             pageNumber={currentPage}
-                            renderTextLayer={true}
-                            renderAnnotationLayer={true}
+                            renderTextLayer
+                            renderAnnotationLayer
                             className="shadow-2xl"
                             width={pageWidth}
                             scale={scale}

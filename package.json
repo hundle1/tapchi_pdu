@@ -100,6 +100,7 @@
   "devDependencies": {
     "@prisma/client": "^7.0.0",
     "@types/cookie": "^0.6.0",
+    "@types/mime-types": "^3.0.1",
     "@types/page-flip": "^2.0.3",
     "@types/pdf-parse": "^1.1.5",
     "@types/react-pdf": "^5.0.7",
