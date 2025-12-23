@@ -1,4 +1,6 @@
-// D:\NCHK\master_degree\tapchi_pdu\app\api\magazines\[id]\route.ts
+// app/api/magazines/[id]/route.ts
+// ⚠️ FILE NÀY LÀ METADATA ROUTE - KHÔNG SỬA
+// File PDF route ở: app/api/magazines/[id]/pdf/route.ts
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
@@ -8,7 +10,6 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // FIX: Await params trước khi sử dụng
     const { id } = await params;
 
     const magazine = await prisma.magazine.findUnique({

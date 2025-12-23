@@ -36,3 +36,9 @@ yarn-error.log*
 next-env.d.ts
 
 /lib/generated/prisma
+# Storage directory (uploaded files)
+/storage/
+!/storage/.gitkeep
+
+# Old public uploads (will be deleted after migration)
+/public/uploads/magazines/

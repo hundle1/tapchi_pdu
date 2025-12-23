@@ -411,8 +411,8 @@ export default function TestPDFPage() {
         <div className="bg-yellow-900/30 border border-yellow-500 rounded-lg p-4 mb-6">
           <h3 className="font-bold text-yellow-400 mb-2">⚠️ IDM (Internet Download Manager) Warning</h3>
           <p className="text-sm text-yellow-200">
-            Nếu bạn đang dùng IDM, vui lòng tắt hoặc disable IDM cho localhost:3000 để test.
-            IDM có thể chặn requests và gây lỗi.
+            tìm cách khắc phục để trình duyệt không bắt link PDF tải về tự động. Vì tôi muốn web tương thích với tất cả
+            các trình duyệt và có hoặc không phụ thuộc vào các phần mềm bên thứ ba như IDM.
           </p>
         </div>
 
