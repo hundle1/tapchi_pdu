@@ -1,11 +1,12 @@
-// ✅ FIXED VERSION - /app/api/admin/magazines/route.ts
-
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import path from 'path';
 import fs from 'fs/promises';
+import crypto from 'crypto';
+
+/* ================= AUTH ================= */
 
 async function checkAdminAuth() {
   const token = (await cookies()).get('admin_token')?.value;
@@ -19,8 +20,12 @@ async function checkAdminAuth() {
     select: { id: true, role: true },
   });
 
-  return user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') ? user : null;
+  return user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN')
+    ? user
+    : null;
 }
+
+/* ================= GET ================= */
 
 export async function GET() {
   try {
@@ -29,23 +34,19 @@ export async function GET() {
       return NextResponse.json({ error: 'Không có quyền truy cập' }, { status: 401 });
     }
 
-    console.log('📋 Fetching all magazines...');
-
     const magazines = await prisma.magazine.findMany({
       include: {
         fileUpload: true,
         categoryName: true,
         major: true,
         TaiKhoanNguoiDung: {
-          select: { id: true, name: true, email: true }
+          select: { id: true, name: true, email: true },
         },
       },
-      orderBy: {
-        createdAt: 'desc'
-      }
+      orderBy: { createdAt: 'desc' },
     });
 
-    const transformedMagazines = magazines.map(mag => ({
+    const transformed = magazines.map((mag) => ({
       id: mag.id,
       tieuDe: mag.tieuDe,
       moTa: mag.moTa,
@@ -53,30 +54,24 @@ export async function GET() {
       trangThai: mag.trangThai,
       createdAt: mag.createdAt,
       TaiKhoanNguoiDung: mag.TaiKhoanNguoiDung,
-      major: mag.major.length > 0 ? mag.major[0].name : 'Chưa phân loại',
+      major: mag.major.length ? mag.major[0].name : 'Chưa phân loại',
       pages: [],
       tenTacGia: mag.tenTacGia,
       fileUpload: mag.fileUpload,
       categoryName: mag.categoryName,
     }));
 
-    console.log('✅ Magazines fetched:', transformedMagazines.length);
-
-    return NextResponse.json(transformedMagazines);
-
+    return NextResponse.json(transformed);
   } catch (error) {
-    console.error('❌ GET /magazines error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
+    console.error('❌ GET /admin/magazines error:', error);
     return NextResponse.json(
-      {
-        error: 'Lỗi khi lấy danh sách tạp chí',
-        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-      },
+      { error: 'Lỗi khi lấy danh sách tạp chí' },
       { status: 500 }
     );
   }
 }
+
+/* ================= POST ================= */
 
 export async function POST(req: Request) {
   try {
@@ -88,7 +83,7 @@ export async function POST(req: Request) {
     const formData = await req.formData();
 
     const tieuDe = (formData.get('tieuDe') as string)?.trim();
-    const tenTacGia = (formData.get('tenTacGia') as string)?.trim() || null;
+    const tenTacGia = (formData.get('tenTacGia') as string)?.trim();
     const moTa = (formData.get('moTa') as string)?.trim() || null;
     const anhBiaLocal = (formData.get('anhBiaLocal') as string)?.trim() || null;
     const anhBiaUrl = (formData.get('anhBiaUrl') as string)?.trim() || null;
@@ -97,44 +92,28 @@ export async function POST(req: Request) {
 
     const categoryIds = formData.getAll('categoryName') as string[];
     const majorIds = formData.getAll('majorIds') as string[];
-
     const file = formData.get('file') as File | null;
 
-    console.log('📋 Form data received:', {
-      tieuDe,
-      tenTacGia,
-      categoryIds,
-      majorIds,
-      fileReceived: !!file,
-      fileName: file?.name,
-      fileType: file?.type,
-      fileSize: file?.size
-    });
+    /* ===== VALIDATE ===== */
 
     if (!tieuDe) {
       return NextResponse.json({ error: 'Tiêu đề là bắt buộc' }, { status: 400 });
+    }
+
+    if (!tenTacGia) {
+      return NextResponse.json({ error: 'Tên tác giả là bắt buộc' }, { status: 400 });
     }
 
     if (!file) {
       return NextResponse.json({ error: 'Chưa chọn file PDF' }, { status: 400 });
     }
 
-    const allowedTypes = ['application/pdf'];
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json({
-        error: `File không đúng định dạng. Chỉ chấp nhận PDF. File hiện tại: ${file.type}`
-      }, { status: 400 });
+    if (file.type !== 'application/pdf') {
+      return NextResponse.json({ error: 'Chỉ chấp nhận file PDF' }, { status: 400 });
     }
 
-    const maxSize = 50 * 1024 * 1024;
-    if (file.size > maxSize) {
-      return NextResponse.json({
-        error: `File quá lớn. Kích thước tối đa: 50MB. File hiện tại: ${(file.size / 1024 / 1024).toFixed(2)}MB`
-      }, { status: 400 });
-    }
-
-    if (!tenTacGia) {
-      return NextResponse.json({ error: 'Tên tác giả là bắt buộc' }, { status: 400 });
+    if (file.size > 50 * 1024 * 1024) {
+      return NextResponse.json({ error: 'File vượt quá 50MB' }, { status: 400 });
     }
 
     if (!anhBiaLocal && !anhBiaUrl) {
@@ -149,38 +128,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Phải chọn ít nhất một ngành học' }, { status: 400 });
     }
 
-    console.log('📂 Processing file upload...');
+    /* ===== FILE STORAGE ===== */
 
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const STORAGE_DIR =
+      process.env.FILE_STORAGE_DIR ||
+      path.join(process.cwd(), 'storage', 'magazines');
 
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'magazines');
-    await fs.mkdir(uploadDir, { recursive: true });
+    await fs.mkdir(STORAGE_DIR, { recursive: true });
 
-    const timestamp = Date.now();
-    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const fileName = `${timestamp}-${sanitizedName}`;
-    const filePath = path.join(uploadDir, fileName);
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const fileId = `${crypto.randomUUID()}.pdf`;
+    const filePath = path.join(STORAGE_DIR, fileId);
 
     await fs.writeFile(filePath, new Uint8Array(buffer));
-    console.log('✅ File saved to:', filePath);
 
-    // ✅ FIX: Lưu absolute path thay vì public URL
-    const absolutePath = filePath;
+    /* ===== DB TRANSACTION ===== */
 
-    console.log('💾 Saving to database...');
-
-    const result = await prisma.$transaction(async (tx) => {
-      // ✅ Lưu absolute path
+    const magazineId = await prisma.$transaction(async (tx) => {
       const fileRecord = await tx.file.create({
         data: {
-          fileName,
+          fileName: file.name,
           fileType: file.type,
-          fileUrl: absolutePath, // ✅ Absolute path
+          fileUrl: fileId, // ✅ chỉ lưu fileId
         },
       });
-
-      console.log('✅ File record created:', fileRecord.id);
 
       const magazine = await tx.magazine.create({
         data: {
@@ -202,43 +173,26 @@ export async function POST(req: Request) {
         },
       });
 
-      console.log('✅ Magazine created:', magazine.id);
       return magazine.id;
-    }, {
-      maxWait: 10000,
-      timeout: 15000,
     });
 
-    const magazineWithRelations = await prisma.magazine.findUnique({
-      where: { id: result },
+    const result = await prisma.magazine.findUnique({
+      where: { id: magazineId },
       include: {
         fileUpload: true,
         TaiKhoanNguoiDung: {
-          select: { name: true, email: true }
+          select: { name: true, email: true },
         },
         categoryName: true,
         major: true,
       },
     });
 
-    return NextResponse.json(magazineWithRelations);
-
+    return NextResponse.json(result);
   } catch (error) {
-    console.error('❌ POST /magazines error:', error);
-
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    const errorStack = error instanceof Error ? error.stack : '';
-
-    console.error('Error details:', {
-      message: errorMessage,
-      stack: errorStack
-    });
-
+    console.error('❌ POST /admin/magazines error:', error);
     return NextResponse.json(
-      {
-        error: 'Lỗi server khi tạo tạp chí',
-        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-      },
+      { error: 'Lỗi server khi tạo tạp chí' },
       { status: 500 }
     );
   }
